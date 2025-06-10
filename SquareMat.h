@@ -36,7 +36,7 @@ class SquareMat {
       SquareMat operator%(const SquareMat& m) const;
 
       // מבצע פעולה של מודולו על כל איבר במטריצה עם מספר שלם נתון
-      SquareMat operator%(double scalar) const;
+      SquareMat operator%(int scalar) const;
 
        // מחלק כל איבר במטריצה במספר סקלרי
   	  SquareMat operator/(double scalar) const;
@@ -74,11 +74,13 @@ class SquareMat {
   	  SquareMat& operator+=(const SquareMat& m);
       SquareMat& operator-=(const SquareMat& m);
       SquareMat& operator*=(const SquareMat& m);
-      SquareMat& operator%=(const SquareMat& m);
-      SquareMat& operator/=(const SquareMat& m);
+	  SquareMat& operator*=(double scalar);
+	  SquareMat& operator%=(const SquareMat& m);
+      SquareMat& operator%=(int scalar);
+      SquareMat& operator/=(double scalar);
 
       // מדפיס את המטריצה בצורה הגיונית
-  	  friend std::ostream& operator<<(std::ostream& os, const SquareMat& m);
+  	  friend std::ostream& operator<<(std::ostream& os, const SquareMat& m) const;
 	};
 } // matrix
 
