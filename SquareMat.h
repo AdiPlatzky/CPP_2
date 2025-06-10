@@ -4,6 +4,7 @@
 
 #ifndef SQUAREMAT_H
 #define SQUAREMAT_H
+#include<ostream>
 #include <cstdio>
 
 namespace matrix {
@@ -36,7 +37,7 @@ class SquareMat {
       SquareMat operator%(const SquareMat& m) const;
 
       // מבצע פעולה של מודולו על כל איבר במטריצה עם מספר שלם נתון
-      SquareMat operator%(int scalar) const;
+      SquareMat operator%(int modulu) const;
 
        // מחלק כל איבר במטריצה במספר סקלרי
   	  SquareMat operator/(double scalar) const;
@@ -46,9 +47,9 @@ class SquareMat {
 
       // אופרטורי הגדלה והקטנה ב-1
       SquareMat& operator++(); // prefix
-      SquareMat& operator++(int); // postfix
+      SquareMat operator++(int); // postfix
       SquareMat& operator--(); // prefix
-      SquareMat& operator--(int); // postfix
+      SquareMat operator--(int); // postfix
 
       //מחליף את השורות בעמודות של המטריצה
   	  SquareMat operator~() const;
@@ -67,6 +68,8 @@ class SquareMat {
       bool operator<(const SquareMat& m) const;
       bool operator<=(const SquareMat& m) const;
 
+	  // מחזיר את המינור של האיבר במיקום (row,col)
+	  SquareMat getMinor(int row, int col) const;
       //מחשב את הדטרמיננטה של המטריצה
   	  double operator!() const;
 
@@ -80,7 +83,7 @@ class SquareMat {
       SquareMat& operator/=(double scalar);
 
       // מדפיס את המטריצה בצורה הגיונית
-  	  friend std::ostream& operator<<(std::ostream& os, const SquareMat& m) const;
+  	  friend std::ostream& operator<<(std::ostream& os, const SquareMat& m);
 	};
 } // matrix
 

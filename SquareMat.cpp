@@ -5,6 +5,7 @@
 #include "SquareMat.h"
 #include <stdexcept>
 #include <iomanip>
+#include <iostream>
 
 namespace matrix
 {
@@ -146,7 +147,7 @@ SquareMat SquareMat::operator*(const SquareMat& m) const
     {
       for (int k = 0; k < size; k++)
       {
-        result.matrix[i][j] += this->matrix[i][k] * m.matrix[k][j];
+        result.matrix[i][j] += (this->matrix[i][k] * m.matrix[k][j]);
       }
     }
   }
@@ -157,13 +158,14 @@ SquareMat SquareMat::operator*(const SquareMat& m) const
 SquareMat operator*(double scalar, const SquareMat& m)
 {
   SquareMat result = SquareMat(m.size);
-  for (int i = 0; i < size; i++)
+  for (int i = 0; i < m.size; i++)
   {
-    for (int j = 0; j < size; j++)
+    for (int j = 0; j < m.size; j++)
     {
       result.matrix[i][j] = scalar * m.matrix[i][j];
     }
   }
+  return result;
 }
 
 SquareMat SquareMat::operator*(double scalar) const
@@ -213,7 +215,7 @@ SquareMat SquareMat::operator%(const SquareMat& m) const
 }
 
   // מבצע פעולה של מודולו על כל איבר במטריצה עם מספר שלם נתון
-SquareMat SquareMa::operator%(int modulu) const
+SquareMat SquareMat::operator%(int modulu) const
 {
   if(modulu <= 0)
   {
@@ -224,7 +226,7 @@ SquareMat SquareMa::operator%(int modulu) const
   {
     for (int j = 0; j < size; j++)
     {
-      result.matrix[i][j] = std::fmod(this->matrix[i][j], modulu);
+      result.matrix[i][j] = static_cast<int>(this->matrix[i][j]) % modulu;
     }
   }
   return result;
@@ -263,17 +265,7 @@ SquareMat SquareMat::operator^(int exponent) const
   }
   else if (exponent < 0)
   {
-    exponent = -exponent;
-    while (exponent > 0)
-    {
-      if(exponent % 2 == 1)
-      {
-        result = result * current;
-      }
-      current = current * current;
-      exponent = exponent / 2;
-    }
-    return 1/result;
+    throw std::invalid_argument("Exponent must be positive");
   }
 
   else
@@ -303,9 +295,9 @@ SquareMat &SquareMat::operator++()
   }
   return *this;
 } // prefix
-SquareMat &SquareMat::operator++(int)
+SquareMat SquareMat::operator++(int)
 {
-  SquareMat result = this->matrix;
+  SquareMat result = (*this);
   for (int i = 0; i < size; i++)
   {
     for (int j = 0; j < size; j++)
@@ -313,8 +305,9 @@ SquareMat &SquareMat::operator++(int)
       this->matrix[i][j] += 1;
     }
   }
-  return *result;
+  return result;
 } // postfix
+
   SquareMat &SquareMat::operator--()
 {
   for (int i = 0; i < size; i++)
@@ -325,10 +318,11 @@ SquareMat &SquareMat::operator++(int)
     }
   }
   return *this;
-} // prefix
-  SquareMat &SquareMat::operator--(int)
+}// prefix
+
+SquareMat SquareMat::operator--(int)
 {
-  SquareMat result = this->matrix;
+  SquareMat result = (*this);
   for (int i = 0; i < size; i++)
   {
     for (int j = 0; j < size; j++)
@@ -336,7 +330,7 @@ SquareMat &SquareMat::operator++(int)
       this->matrix[i][j] -= 1;
     }
   }
-  return *result;
+  return result;
 } // postfix
 
   //מחליף את השורות בעמודות של המטריצה
@@ -356,7 +350,7 @@ SquareMat SquareMat::operator~() const
   // אופרטור גישה לאיברים באמצעות אינדקס
 double* SquareMat::operator[](int i)
 {
-  if (i < 0 || i > size)
+  if (i < 0 || i >= size)
   {
     throw std::invalid_argument("Index out of bounds");
   }
@@ -425,22 +419,28 @@ bool SquareMat::operator<=(const SquareMat& m) const
   return !(m < *this);
 }
 
-SquareMat getMinor(const SquareMat& m, int row, int col) const
+SquareMat SquareMat::getMinor(int row, int col) const
 {
-  int size = m.size;
-  if (row < size || row > size || col < size || col > size)
+  if (row < 0 || row >= size || col < 0 || col >= size)
   {
     throw std::invalid_argument("Index out of bounds - check row or col");
   }
-  SquareMat minor(size - 1);
-  int newR = 0, newC = 0;
+
+  SquareMat minor(this->size - 1);
+  int newR = 0;
   for (int i = 0; i < size; i++)
   {
-    if(i == row) continue;
-    newR = 0;
+    if(i == row)
+    {
+      continue;
+    }
+    int newC = 0;
     for (int j = 0; j < size; j++)
     {
-      if(j == col) continue;
+      if(j == col)
+      {
+        continue;
+      }
       minor.matrix[newR][newC] = this->matrix[i][j];
       newC++;
     }
@@ -465,8 +465,8 @@ double SquareMat::operator!() const
   int det = 0;
   for (int i = 0; i < size; i++)
   {
-    SquareMat minor = getMinor(*this, 0, i);
-    det += (i % 2 == 0 ? 1 : -1) * matrix[0][i] * !minor);
+    SquareMat minor = getMinor(0, i);
+    det += ((i % 2 == 0 ? 1 : -1) * matrix[0][i] * !minor);
   }
   return det;
 }
@@ -513,16 +513,8 @@ SquareMat &SquareMat::operator*=(const SquareMat& m)
     throw std::invalid_argument("Matrixs size must be same");
   }
 
-  for (int i = 0; i < size; i++)
-  {
-    for (int j = 0; j < size; j++)
-    {
-      for (int k = 0; k < size; k++)
-      {
-        this->matrix[i][j] += m.matrix[i][k] * this->matrix[k][j];
-      }
-    }
-  }
+  SquareMat result = (*this) * m;
+  *this = result;
   return *this;
 }
 
@@ -546,7 +538,7 @@ SquareMat &SquareMat::operator*=(double scalar)
   {
     for (int j = 0; j < size; j++)
     {
-      this->matrix[i][j] *= scalar;
+      this->matrix[i][j] = this->matrix[i][j] * scalar;
     }
   }
   return *this;
@@ -579,7 +571,7 @@ SquareMat &SquareMat::operator%=(int modulu)
   {
     for (int j = 0; j < size; j++)
     {
-      this->matrix[i][j] = std::fmod(this->matrix[i][j], modulu);
+      this->matrix[i][j] = static_cast<int>(this->matrix[i][j]) % modulu;
     }
   }
   return *this;
@@ -605,10 +597,10 @@ SquareMat &SquareMat::operator/=(double scalar)
 std::ostream& operator<<(std::ostream& os, const SquareMat& m)
 {
   os << "Matrix (" << m.size << "x" << m.size << ")" << std::endl;
-  for (int i = 0; i < size; i++)
+  for (int i = 0; i < m.size; i++)
   {
     os << "|";
-    for (int j = 0; j < size; j++)
+    for (int j = 0; j < m.size; j++)
     {
       os << std::setw(3) << m.matrix[i][j] << " ";
     }
